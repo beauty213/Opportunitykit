@@ -1,0 +1,90 @@
+from __future__ import annotations
+
+SAMPLE_PROFILE = {
+    "name": "Priya Sharma",
+    "email": "priya@example.com",
+    "college": "VIT Vellore",
+    "degree": "B.Tech",
+    "department": "Computer Science",
+    "current_year": "3rd Year",
+    "graduation_year": 2027,
+    "cgpa": 8.2,
+    "skills": ["Python", "JavaScript", "SQL", "React", "FastAPI"],
+    "projects": ["AI resume matcher", "Smart campus portal"],
+    "resume_url": "https://example.com/resume",
+    "github_url": "https://github.com/priya",
+    "linkedin_url": "https://linkedin.com/in/priya",
+    "documents": {
+        "resume": "uploaded",
+        "transcript": "uploaded",
+    },
+    "income": "Low income",
+    "category": "General",
+}
+
+SAMPLE_OPPORTUNITIES = [
+    {
+        "id": 1,
+        "title": "Python Development Internship",
+        "organization": "Nova Labs",
+        "category": "Internship",
+        "description": "Build data pipelines and APIs using Python and SQL. Requires CGPA 7.0 or above and graduation year 2027 or later. Resume required.",
+        "location": "Bengaluru",
+        "remote": "Hybrid",
+        "deadline": "2026-11-15",
+        "application_url": "https://example.com/apply/1",
+        "source_url": "https://example.com/opportunity/1",
+        "verification_status": "verified",
+        "last_checked": "2026-10-12",
+        "requirements": [
+            {"name": "CGPA", "category": "academics", "required": True, "status": "mandatory", "expected_value": "Minimum 7.0", "comparison_type": "cgpa_min", "value": 7.0},
+            {"name": "Graduation year", "category": "academics", "required": True, "status": "mandatory", "expected_value": "2027 or later", "comparison_type": "graduation_year_min", "value": 2027},
+            {"name": "Python", "category": "skills", "required": True, "status": "mandatory", "expected_value": "Python experience", "comparison_type": "skill", "value": "python"},
+            {"name": "Resume", "category": "documents", "required": True, "status": "mandatory", "expected_value": "Resume uploaded", "comparison_type": "resume", "value": "resume"},
+            {"name": "SQL", "category": "skills", "required": False, "status": "preferred", "expected_value": "SQL preferred", "comparison_type": "skill", "value": "sql"},
+        ],
+    },
+    {
+        "id": 2,
+        "title": "Women in STEM Scholarship",
+        "organization": "Future Foundry",
+        "category": "Scholarship",
+        "description": "Open to female students with CGPA 8.0 and income certificate. Preferred if applying for CS or Electronics. Current year must be 2nd year or above.",
+        "location": "Remote",
+        "remote": "Remote",
+        "deadline": "2026-10-30",
+        "application_url": "https://example.com/scholarship/2",
+        "source_url": "https://example.com/scholarship/2",
+        "verification_status": "unverified",
+        "last_checked": "2026-09-28",
+        "requirements": [
+            {"name": "CGPA", "category": "academics", "required": True, "status": "mandatory", "expected_value": "Minimum 8.0", "comparison_type": "cgpa_min", "value": 8.0},
+            {"name": "Income certificate", "category": "documents", "required": True, "status": "mandatory", "expected_value": "Income certificate required", "comparison_type": "document", "value": "income"},
+            {"name": "Department", "category": "academics", "required": False, "status": "preferred", "expected_value": "CS or ECE preferred", "comparison_type": "manual", "value": "department"},
+        ],
+    },
+    {
+        "id": 3,
+        "title": "Graduate Software Engineer",
+        "organization": "Orbit Systems",
+        "category": "Job",
+        "description": "Build and maintain web services with Python and JavaScript. Open to 2027 graduates with a CGPA of 7.0 or higher.",
+        "location": "Chennai",
+        "remote": "Hybrid",
+        "deadline": "2026-12-10",
+        "application_url": "https://example.com/jobs/graduate-engineer",
+        "source_url": "https://example.com/jobs/graduate-engineer",
+        "verification_status": "unverified",
+        "last_checked": "Not yet checked",
+        "requirements": [
+            {"name": "CGPA", "category": "academics", "required": True, "status": "mandatory", "expected_value": "Minimum 7.0", "comparison_type": "cgpa_min", "value": 7.0},
+            {"name": "Graduation year", "category": "academics", "required": True, "status": "mandatory", "expected_value": "2027 or later", "comparison_type": "graduation_year_min", "value": 2027},
+            {"name": "Python", "category": "skills", "required": True, "status": "mandatory", "expected_value": "Python experience", "comparison_type": "skill", "value": "python"},
+        ],
+    },
+]
+
+SAMPLE_APPLICATIONS = [
+    {"id": 1, "opportunity_id": 1, "status": "preparing documents", "application_date": "2026-10-13", "notes": "Resume and transcript uploaded.", "reminder_date": "2026-10-20"},
+    {"id": 2, "opportunity_id": 2, "status": "saved", "application_date": None, "notes": "Need income certificate.", "reminder_date": "2026-10-27"},
+]
