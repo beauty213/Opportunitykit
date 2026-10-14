@@ -34,7 +34,7 @@ This project has a Vite frontend and a separate FastAPI backend. Deploying the f
 
 1. **Revoke any exposed GitHub token.** The value pasted into chat has the format of a GitHub Personal Access Token, but its validity cannot be confirmed here. Treat it as compromised: open [GitHub token settings](https://github.com/settings/tokens), revoke it, and do not paste a replacement into chat, source files, or Vercel. Vercel's GitHub app integration does not require you to enter a PAT.
 2. **Check the repository.** `https://github.com/beauty213/Opportunitykit` is the GitHub repository URL. Push the project changes you want to deploy to the repository before continuing.
-3. **Deploy the API.** In Render, create a new Web Service and connect the repository. Set the root directory to `backend`, the build command to `pip install -r requirements.txt`, and the start command to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Add these backend environment variables:
+3. **Deploy the API.** In Render, create a new Web Service and connect the repository. Set the root directory to `backend`, the build command to `pip install -r requirements.txt`, and the start command to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. The `backend/.python-version` file pins the service to Python 3.13.14; keep this version pin so older pinned dependencies install prebuilt wheels instead of trying to compile on Python 3.14. Add these backend environment variables:
    - `APP_NAME`: `OPPORTUNITYKIT`
    - `SECRET_KEY`: a new, randomly generated value stored only in the hosting provider's environment settings
    - `CORS_ORIGINS`: your Vercel production origin, for example `https://your-project.vercel.app`
