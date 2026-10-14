@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      APP_NAME: OPPORTUNITYKIT
+      DATABASE_URL: sqlite:////data/opportunitykit.db
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      CORS_ORIGINS: http://localhost:5173,http://localhost:4173
+    ports:
+      - "8001:8001"
+    volumes:
+      - opportunitykit-data:/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+
+volumes:
+  opportunitykit-data:

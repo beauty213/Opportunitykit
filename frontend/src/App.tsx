@@ -76,7 +76,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 type NavKey = 'dashboard' | 'explore' | 'analyze' | 'checklist' | 'tracker' | 'resume' | 'profile';
 
-const API_BASE = 'http://localhost:8001';
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8001';
 const RESUME_STORAGE_KEY = 'opportunitykit-resume';
 
 const emptyResume: ResumeData = {

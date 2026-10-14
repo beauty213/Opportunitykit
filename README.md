@@ -28,6 +28,18 @@ The resume builder saves its data in the current browser's local storage; it doe
 
 ## Quick start
 
+### Docker Compose
+
+With Docker Engine and the Compose plugin installed, run from the project root:
+
+```bash
+docker compose up --build
+```
+
+Open the app at <http://localhost:5173>. The frontend proxies API requests to the backend service inside Compose; the API is also exposed at <http://localhost:8001>. Stop the services with `Ctrl+C`, or run `docker compose down`. Opportunity and profile data are currently in-memory in the MVP; the Compose volume at `/data` is ready for database persistence when the SQLAlchemy models are wired into the API.
+
+Set `SECRET_KEY` in the environment before deploying beyond local development.
+
 ### Backend
 
 ```bash
