@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import APP_NAME, CORS_ORIGINS
@@ -37,7 +37,7 @@ def get_profile() -> dict[str, Any]:
 
 @app.put("/api/profile")
 def update_profile(payload: ProfileUpdate) -> dict[str, Any]:
-    data = payload.model_dump(exclude_none=True)
+    data = payload.model_dump(exclude_unset=True)
     PROFILE_STATE.update(data)
     return {"status": "updated", "profile": PROFILE_STATE}
 
@@ -45,6 +45,23 @@ def update_profile(payload: ProfileUpdate) -> dict[str, Any]:
 @app.get("/api/opportunities")
 def get_opportunities() -> list[dict[str, Any]]:
     return OPPORTUNITIES
+
+
+def _requirements_for(opportunity: dict[str, Any]) -> list[dict[str, Any]]:
+    requirements = [dict(item) for item in opportunity.get("requirements", [])]
+    if not any(item.get("comparison_type") == "deadline" for item in requirements):
+        requirements.append(
+            {
+                "name": "Application deadline",
+                "category": "deadline",
+                "required": False,
+                "status": "informational",
+                "expected_value": opportunity.get("deadline") or "Confirm the closing date",
+                "comparison_type": "deadline",
+                "value": opportunity.get("deadline"),
+            }
+        )
+    return requirements
 
 
 @app.post("/api/opportunities")
@@ -73,8 +90,8 @@ def analyze_opportunity(opportunity_id: int) -> dict[str, Any]:
     if not opportunity:
         return {"status": "not_found"}
 
-    requirements = opportunity.get("requirements", [])
-    results = evaluate_requirements(PROFILE_STATE, requirements)
+    requirements = _requirements_for(opportunity)
+    results = evaluate_requirements(PROFILE_STATE, requirements, context={"deadline": opportunity.get("deadline")})
     summary = {
         "match": sum(1 for item in results if item["evaluation_status"] == "MATCH"),
         "mismatch": sum(1 for item in results if item["evaluation_status"] == "MISMATCH"),
@@ -90,8 +107,14 @@ def analyze_opportunity(opportunity_id: int) -> dict[str, Any]:
 
 
 @app.get("/api/checklists")
-def get_checklists() -> list[dict[str, Any]]:
-    return OPPORTUNITIES[0].get("requirements", [])
+def get_checklists(opportunity_id: int | None = None) -> list[dict[str, Any]]:
+    opportunity = next(
+        (item for item in OPPORTUNITIES if item["id"] == opportunity_id),
+        None,
+    ) if opportunity_id is not None else next(iter(OPPORTUNITIES), None)
+    if opportunity is None:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    return _requirements_for(opportunity)
 
 
 @app.get("/api/applications")

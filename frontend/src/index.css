@@ -804,6 +804,121 @@ textarea {
   gap: 18px;
 }
 
+.checklist-header {
+  align-items: flex-start;
+}
+
+.checklist-opportunity-picker {
+  display: grid;
+  gap: 6px;
+  min-width: min(100%, 280px);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.checklist-opportunity-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #faf9ff;
+}
+
+.checklist-opportunity-summary div {
+  display: grid;
+  gap: 5px;
+}
+
+.checklist-opportunity-summary span,
+.checklist-expected,
+.checklist-category {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.checklist-opportunity-summary strong {
+  font-size: 15px;
+}
+
+.checklist-summary {
+  margin-top: 16px;
+}
+
+.checklist-summary-copy {
+  margin: 0 0 16px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.checklist-results {
+  display: grid;
+  gap: 12px;
+}
+
+.checklist-result {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.checklist-result-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.checklist-result-header h5 {
+  margin: 4px 0;
+  font-size: 16px;
+}
+
+.checklist-category {
+  text-transform: capitalize;
+}
+
+.checklist-result p {
+  margin: 12px 0 8px;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.checklist-result small {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.document-readiness {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.document-readiness h5,
+.document-readiness .muted-copy {
+  margin: 0;
+}
+
+.document-readiness-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.document-readiness-row select {
+  width: auto;
+  min-width: 150px;
+}
+
 .check-group {
   border: 1px solid var(--border);
   background: #fafafa;
@@ -996,6 +1111,13 @@ textarea {
   }
 
   .tracker-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checklist-header,
+  .checklist-opportunity-summary,
+  .checklist-result-header {
+    display: grid;
     grid-template-columns: 1fr;
   }
 

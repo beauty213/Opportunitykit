@@ -13,7 +13,10 @@ class ProfileUpdate(BaseModel):
     department: str | None = None
     current_year: str | None = None
     graduation_year: int | None = None
+    marks: float | None = None
     cgpa: float | str | None = None
+    annual_income: float | None = None
+    team_size: int | None = None
     skills: list[str] | None = None
     projects: list[str] | None = None
     resume_url: str | None = None

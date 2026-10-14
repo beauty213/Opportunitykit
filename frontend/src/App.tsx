@@ -26,14 +26,17 @@ type Profile = {
   degree: string;
   department: string;
   current_year: string;
-  graduation_year: number;
-  cgpa: number;
+  graduation_year: number | null;
+  marks?: number | null;
+  cgpa: number | string | null;
+  annual_income?: number | null;
+  team_size?: number | null;
   skills: string[];
   projects?: string[];
   resume_url: string;
   github_url: string;
   linkedin_url: string;
-  documents: Record<string, string>;
+  documents: Record<string, string | boolean>;
 };
 
 type Application = {
@@ -108,6 +111,7 @@ function App() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [eligibilityByOpportunity, setEligibilityByOpportunity] = useState<Record<number, EligibilityFit>>({});
   const [selectedOpportunityId, setSelectedOpportunityId] = useState<number | null>(null);
+  const [checklistOpportunityId, setChecklistOpportunityId] = useState<number | null>(null);
   const [analysis, setAnalysis] = useState<any | null>(null);
   const [extractedRequirements, setExtractedRequirements] = useState<any[]>([]);
   const [manualText, setManualText] = useState('');
@@ -143,6 +147,7 @@ function App() {
       setApplications(applicationsRes.data);
       if (oppRes.data.length > 0) {
         setSelectedOpportunityId(oppRes.data[0].id);
+        setChecklistOpportunityId(oppRes.data[0].id);
       }
     }).catch(() => {
       setApplications([]);
@@ -154,7 +159,10 @@ function App() {
         department: 'Computer Science',
         current_year: '3rd Year',
         graduation_year: 2027,
+        marks: null,
         cgpa: 8.2,
+        annual_income: null,
+        team_size: null,
         skills: ['Python', 'SQL', 'React', 'JavaScript', 'FastAPI'],
         projects: ['AI resume matcher', 'Smart campus portal'],
         resume_url: 'https://example.com/resume',
@@ -217,6 +225,7 @@ function App() {
         },
       ]);
       setSelectedOpportunityId(1);
+      setChecklistOpportunityId(1);
     });
   }, []);
 
@@ -227,7 +236,7 @@ function App() {
       fullName: profile.name,
       email: profile.email,
       location: '',
-      education: [profile.degree, profile.department, profile.college, `Expected graduation: ${profile.graduation_year}`].filter(Boolean).join(' · '),
+      education: [profile.degree, profile.department, profile.college, profile.graduation_year ? `Expected graduation: ${profile.graduation_year}` : ''].filter(Boolean).join(' · '),
       skills: profile.skills.join(', '),
       projects: profile.projects?.join('\n') ?? '',
       links: [profile.github_url, profile.linkedin_url].filter(Boolean).join('\n'),
@@ -342,6 +351,18 @@ function App() {
     () => filteredOpportunities.find((item) => item.id === selectedOpportunityId) ?? filteredOpportunities[0],
     [filteredOpportunities, selectedOpportunityId],
   );
+  const checklistOpportunity = opportunities.find((item) => item.id === checklistOpportunityId) ?? opportunities[0];
+  const checklistAnalysis = analysis?.opportunity_id === checklistOpportunity?.id ? analysis : null;
+  const checklistResults: Array<Record<string, any>> = checklistAnalysis?.results ?? [];
+  const checklistStatusCounts = checklistResults.reduce(
+    (counts, item) => {
+      if (item.evaluation_status === 'MATCH') counts.match += 1;
+      else if (item.evaluation_status === 'MISMATCH') counts.mismatch += 1;
+      else counts.missing += 1;
+      return counts;
+    },
+    { match: 0, mismatch: 0, missing: 0 },
+  );
 
   useEffect(() => {
     if (!filteredOpportunities.length) return;
@@ -350,7 +371,10 @@ function App() {
     }
   }, [filteredOpportunities, selectedOpportunityId]);
 
-  const handleProfileChange = (field: keyof Profile, value: string | number | string[]) => {
+  const handleProfileChange = (
+    field: keyof Profile,
+    value: string | number | string[] | Record<string, string | boolean> | null,
+  ) => {
     setProfile((current) => (current ? { ...current, [field]: value } : null));
   };
 
@@ -425,6 +449,7 @@ function App() {
     if (status === 'MISMATCH') return 'mismatch';
     return 'missing';
   };
+  const statusLabel = (status: Status) => status === 'MATCH' ? 'Match' : status === 'MISMATCH' ? 'Mismatch' : 'Missing information';
 
   return (
     <div className="app-shell">
@@ -800,31 +825,81 @@ function App() {
 
         {tab === 'checklist' && (
           <div className="panel">
-            <div className="panel-header">
-              <h4>Application readiness checklist</h4>
-              <span className="tag">72% complete</span>
+            <div className="panel-header checklist-header">
+              <div>
+                <h4>Opportunity requirement checklist</h4>
+                <p className="muted-copy">Compare eligibility, skills, documents, and deadlines with your profile.</p>
+              </div>
+              <label className="checklist-opportunity-picker">
+                Opportunity
+                <select
+                  aria-label="Choose opportunity checklist"
+                  value={checklistOpportunity?.id ?? ''}
+                  onChange={(event) => {
+                    const opportunityId = Number(event.target.value);
+                    setChecklistOpportunityId(opportunityId);
+                    setSelectedOpportunityId(opportunityId);
+                  }}
+                >
+                  {opportunities.map((opportunity) => (
+                    <option key={opportunity.id} value={opportunity.id}>{opportunity.title} · {opportunity.category}</option>
+                  ))}
+                </select>
+              </label>
             </div>
 
-            <div className="checklist-grid">
-              <div className="check-group">
-                <h5>Required before applying</h5>
-                {['Upload resume', 'Confirm graduation year', 'Prepare transcript'].map((task) => (
-                  <label key={task} className="check-item"><input type="checkbox" defaultChecked /> {task}</label>
-                ))}
-              </div>
-              <div className="check-group">
-                <h5>Information to confirm</h5>
-                {['Python skill evidence', 'Income certificate', 'Branch eligibility'].map((task) => (
-                  <label key={task} className="check-item"><input type="checkbox" /> {task}</label>
-                ))}
-              </div>
-              <div className="check-group">
-                <h5>Recommended improvements</h5>
-                {['Add portfolio project', 'Polish LinkedIn profile', 'Practice interview questions'].map((task) => (
-                  <label key={task} className="check-item"><input type="checkbox" /> {task}</label>
-                ))}
-              </div>
-            </div>
+            {checklistOpportunity ? (
+              <>
+                <div className="checklist-opportunity-summary">
+                  <div>
+                    <span>{checklistOpportunity.organization} · {checklistOpportunity.category}</span>
+                    <strong>{checklistOpportunity.title}</strong>
+                  </div>
+                  <div>
+                    <span>Application deadline</span>
+                    <strong>{checklistOpportunity.deadline ?? 'Not provided'}</strong>
+                  </div>
+                </div>
+
+                {checklistAnalysis ? (
+                  <>
+                    <div className="summary-box checklist-summary">
+                      <div><span>Match</span><strong>{checklistStatusCounts.match}</strong></div>
+                      <div className="danger"><span>Mismatch</span><strong>{checklistStatusCounts.mismatch}</strong></div>
+                      <div className="warning"><span>Missing information</span><strong>{checklistStatusCounts.missing}</strong></div>
+                    </div>
+                    <p className="checklist-summary-copy">
+                      {checklistStatusCounts.mismatch > 0
+                        ? `${checklistStatusCounts.mismatch} requirement${checklistStatusCounts.mismatch === 1 ? '' : 's'} do not currently match. Review the reasons and next steps below.`
+                        : checklistStatusCounts.missing > 0
+                          ? `${checklistStatusCounts.missing} requirement${checklistStatusCounts.missing === 1 ? '' : 's'} need more information. Add the missing details before deciding whether you qualify.`
+                          : 'All listed requirements currently match your profile.'}
+                    </p>
+
+                    <div className="checklist-results">
+                      {checklistResults.map((item, index) => (
+                        <article key={`${item.name}-${index}`} className="checklist-result">
+                          <div className="checklist-result-header">
+                            <div>
+                              <span className="checklist-category">{String(item.category ?? 'general').replace(/_/g, ' ')}</span>
+                              <h5>{item.name}</h5>
+                              <span className="checklist-expected">{item.expected_value ?? 'Requirement details not provided'}</span>
+                            </div>
+                            <span className={`status-pill ${statusClass(item.evaluation_status)}`}>{statusLabel(item.evaluation_status)}</span>
+                          </div>
+                          <p>{item.explanation}</p>
+                          <small>Next step: {item.recommended_action}</small>
+                        </article>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="empty-box">Requirement analysis is unavailable. Start the API and try again to compare this checklist with your profile.</div>
+                )}
+              </>
+            ) : (
+              <div className="empty-box">Add or load an opportunity to build its requirement checklist.</div>
+            )}
           </div>
         )}
 
@@ -928,12 +1003,48 @@ function App() {
               <input value={profile.degree} onChange={(e) => handleProfileChange('degree', e.target.value)} placeholder="Degree" />
               <input value={profile.department} onChange={(e) => handleProfileChange('department', e.target.value)} placeholder="Department" />
               <input value={profile.current_year} onChange={(e) => handleProfileChange('current_year', e.target.value)} placeholder="Academic year" />
-              <input type="number" value={profile.graduation_year} onChange={(e) => handleProfileChange('graduation_year', Number(e.target.value))} placeholder="Graduation year" />
-              <input type="number" step="0.1" value={profile.cgpa} onChange={(e) => handleProfileChange('cgpa', Number(e.target.value))} placeholder="CGPA" />
+              <input type="number" value={profile.graduation_year ?? ''} onChange={(e) => handleProfileChange('graduation_year', e.target.value === '' ? null : Number(e.target.value))} placeholder="Graduation year" />
+              <input type="number" step="0.1" value={profile.cgpa ?? ''} onChange={(e) => handleProfileChange('cgpa', e.target.value === '' ? null : Number(e.target.value))} placeholder="CGPA" />
+              <input type="number" step="0.1" value={profile.marks ?? ''} onChange={(e) => handleProfileChange('marks', e.target.value === '' ? null : Number(e.target.value))} placeholder="Marks / percentage" />
+              <input type="number" value={profile.annual_income ?? ''} onChange={(e) => handleProfileChange('annual_income', e.target.value === '' ? null : Number(e.target.value))} placeholder="Annual family income (₹)" />
+              <input type="number" min="1" value={profile.team_size ?? ''} onChange={(e) => handleProfileChange('team_size', e.target.value === '' ? null : Number(e.target.value))} placeholder="Competition team size" />
               <input value={profile.skills.join(', ')} onChange={(e) => handleProfileChange('skills', e.target.value.split(',').map((item) => item.trim()))} placeholder="Skills" />
+              <input value={profile.projects?.join(', ') ?? ''} onChange={(e) => handleProfileChange('projects', e.target.value.split(',').map((item) => item.trim()))} placeholder="Projects / portfolio items" />
               <input value={profile.resume_url} onChange={(e) => handleProfileChange('resume_url', e.target.value)} placeholder="Resume URL" />
               <input value={profile.github_url} onChange={(e) => handleProfileChange('github_url', e.target.value)} placeholder="GitHub URL" />
               <input value={profile.linkedin_url} onChange={(e) => handleProfileChange('linkedin_url', e.target.value)} placeholder="LinkedIn URL" />
+            </div>
+            <div className="document-readiness">
+              <h5>Document readiness</h5>
+              <p className="muted-copy">Keep unknown documents unconfirmed; mark only documents you have checked.</p>
+              {([
+                ['resume', 'Resume'],
+                ['transcript', 'Academic transcript'],
+                ['income', 'Income certificate'],
+                ['portfolio', 'Portfolio'],
+              ] as const).map(([key, label]) => {
+                const value = profile.documents?.[key];
+                const readiness = value === undefined ? 'unknown' : value === false || ['no', 'missing', 'not uploaded', 'not ready'].includes(String(value).toLowerCase()) ? 'not_ready' : 'ready';
+                return (
+                  <label key={key} className="document-readiness-row">
+                    <span>{label}</span>
+                    <select
+                      aria-label={`${label} readiness`}
+                      value={readiness}
+                      onChange={(event) => {
+                        const documents = { ...profile.documents };
+                        if (event.target.value === 'unknown') delete documents[key];
+                        else documents[key] = event.target.value === 'ready' ? 'ready' : false;
+                        handleProfileChange('documents', documents);
+                      }}
+                    >
+                      <option value="unknown">Not confirmed</option>
+                      <option value="ready">Ready</option>
+                      <option value="not_ready">Not ready</option>
+                    </select>
+                  </label>
+                );
+              })}
             </div>
           </div>
         )}

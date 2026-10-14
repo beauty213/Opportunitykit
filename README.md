@@ -18,6 +18,7 @@ OPPORTUNITYKIT is a student-first opportunity discovery and readiness platform. 
 - Eligibility analysis with MATCH / MISMATCH / MISSING_INFORMATION states
 - Missing-information follow-up guidance
 - Interpretable requirement explanations and recommended actions
+- Opportunity-specific requirement checklists for internships, scholarships, and competitions, including profile-aware marks, income, branch, document, team-size, and deadline checks
 - Job and internship filters, including profile requirement-fit filtering
 - Application tracking with editable application status
 - In-browser resume builder with a live print/PDF preview
@@ -70,7 +71,7 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:4173
 - POST /api/opportunities
 - POST /api/opportunities/extract
 - POST /api/opportunities/{id}/analyze
-- GET /api/checklists
+- GET /api/checklists?opportunity_id={id} (opportunity-specific checklist; ID optional)
 - GET /api/applications
 - POST /api/applications
 - PATCH /api/applications/{id}
