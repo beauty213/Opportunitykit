@@ -28,6 +28,23 @@ The resume builder saves its data in the current browser's local storage; it doe
 
 ## Quick start
 
+### Deploy the frontend on Vercel
+
+This project has a Vite frontend and a separate FastAPI backend. Deploying the frontend on Vercel does not deploy the API. Deploy the backend first (for example, as a Python web service on Render), then connect the frontend to its public URL.
+
+1. **Revoke any exposed GitHub token.** The value pasted into chat has the format of a GitHub Personal Access Token, but its validity cannot be confirmed here. Treat it as compromised: open [GitHub token settings](https://github.com/settings/tokens), revoke it, and do not paste a replacement into chat, source files, or Vercel. Vercel's GitHub app integration does not require you to enter a PAT.
+2. **Check the repository.** `https://github.com/beauty213/Opportunitykit` is the GitHub repository URL. Push the project changes you want to deploy to the repository before continuing.
+3. **Deploy the API.** In Render, create a new Web Service and connect the repository. Set the root directory to `backend`, the build command to `pip install -r requirements.txt`, and the start command to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Add these backend environment variables:
+   - `APP_NAME`: `OPPORTUNITYKIT`
+   - `SECRET_KEY`: a new, randomly generated value stored only in the hosting provider's environment settings
+   - `CORS_ORIGINS`: your Vercel production origin, for example `https://your-project.vercel.app`
+4. **Import the repository into Vercel.** Choose **Add New → Project**, import `beauty213/Opportunitykit`, and set the **Root Directory** to `frontend`. Vercel should detect Vite; use build command `npm run build` and output directory `dist`.
+5. **Set the Vercel API URL.** In the Vercel project's **Settings → Environment Variables**, add `VITE_API_BASE` with the public backend origin from step 3 (for example `https://your-api.onrender.com`, without a trailing slash). Select Production, save, and redeploy so the build includes the variable.
+6. **Allow the deployed frontend in backend CORS.** Set `CORS_ORIGINS` on the backend to the exact Vercel production origin (and any custom domain origin you use), then restart/redeploy the API.
+7. **Verify the deployment.** Open the Vercel URL, then check `https://your-api.onrender.com/health` returns a healthy response. Test loading opportunities and analyzing an opportunity in the app.
+
+The backend currently keeps profile, opportunity, and application data in process memory; deploying it does not make those records persistent. They can reset when the backend restarts or sleeps. The resume builder stores its data in the user's browser. Add a persistent database and storage before relying on production data retention.
+
 ### Docker Compose
 
 With Docker Engine and the Compose plugin installed, run from the project root:
